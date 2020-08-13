@@ -1,0 +1,6 @@
+composer.lock
+composer.phar
+docker-compose.yml
+tests/_output
+/vendor/
+/var/

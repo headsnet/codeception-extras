@@ -1,0 +1,45 @@
+{
+  "name": "headsnet/codeception-extras",
+  "type": "library",
+  "description": "Add various useful extra to Codeception",
+  "keywords": [
+    "codeception",
+    "testing",
+    "php"
+  ],
+  "homepage": "https://github.com/headsnet/codeception-extras",
+  "license": "MIT",
+  "support": {
+    "issues": "https://github.com/headsnet/codeception-extras/issues"
+  },
+  "require": {
+    "php": ">=7.2",
+    "codeception/codeception": "^4.1",
+    "codeception/module-asserts": "^1.0",
+    "codeception/module-webdriver": "^1.0"
+  },
+  "require-dev": {
+    "symplify/easy-coding-standard": "^8.1",
+    "phpunit/phpunit": "^8.5"
+  },
+  "suggest": {
+
+  },
+  "autoload": {
+    "psr-4": {
+      "Headsnet\\CodeceptionExtras\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Headsnet\\CodeceptionExtras\\": "tests/"
+    }
+  },
+  "scripts": {
+    "cs": "vendor/bin/ecs check --ansi --config=ecs.php",
+    "cs-fix": "vendor/bin/ecs check --ansi --config=ecs.php --fix",
+    "static": "vendor/bin/phpstan analyze --ansi",
+    "test": "vendor/bin/phpunit",
+    "test-coverage": "vendor/bin/phpunit --coverage-html tests/_output/coverage"
+  }
+}

@@ -10,30 +10,18 @@
 
 declare(strict_types=1);
 
-namespace Headsnet\CodeceptionExtras\Extensions;
+namespace Headsnet\CodeceptionExtras\Extensions\JsConsoleLogger;
 
 use Codeception\Event\StepEvent;
 use Codeception\Event\SuiteEvent;
 use Codeception\Events;
-use Codeception\Exception\ExtensionException;
-use Codeception\Extension;
 use Codeception\Module\Asserts;
-use Codeception\Module\WebDriver;
 use Codeception\Test\Descriptor;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Headsnet\CodeceptionExtras\Extensions\AbstractWebDriverExtension;
 
-final class JsConsoleLogger extends Extension
+final class JsConsoleLogger extends AbstractWebDriverExtension
 {
-    /**
-     * @var string
-     */
-    private $environment;
-
-    /**
-     * @var WebDriver
-     */
-    private $webDriverModule;
-
     /**
      * @var Asserts
      */
@@ -48,19 +36,16 @@ final class JsConsoleLogger extends Extension
      * @var array
      */
     public static $events = [
-        Events::SUITE_BEFORE => 'beforeSuite',
+        Events::SUITE_BEFORE => [
+            ['loadWebDriver', 100],
+            ['loadCurrentEnvironment', 100],
+            ['beforeSuite', 0]
+        ],
         Events::STEP_AFTER => 'afterStep',
     ];
 
     public function beforeSuite(SuiteEvent $event)
     {
-        if (!array_key_exists('current_environment', $event->getSettings()))
-        {
-            throw new ExtensionException($this, 'No test environment specified!');
-        }
-
-        $this->environment = str_replace(',', '.', $event->getSettings()['current_environment']);
-        $this->webDriverModule = $this->getModule('WebDriver');
         $this->assertsModule = $this->getModule('Asserts');
     }
 
@@ -73,12 +58,10 @@ final class JsConsoleLogger extends Extension
 
     private function checkJsErrors(): void
     {
-        $this->webDriverModule->executeInSelenium(function (RemoteWebDriver $webDriver): void
-        {
+        $this->webDriverModule->executeInSelenium(function (RemoteWebDriver $webDriver): void {
             $log = $webDriver->manage()->getLog('browser');
 
-            $errors = array_values(array_filter($log, function ($entry): bool
-            {
+            $errors = array_values(array_filter($log, function ($entry): bool {
                 // Permit the error about insecure passwords on non-https
                 return false === strpos($entry['message'], 'non-secure context') &&
                     false === strpos($entry['message'], '/_wdt/');
@@ -86,8 +69,7 @@ final class JsConsoleLogger extends Extension
 
             $errorMsg = count($errors) > 0 ? $errors[0]['message'] : '';
 
-            if (count($errors) > 0)
-            {
+            if (count($errors) > 0) {
                 $this->writeLogFile($log);
             }
 

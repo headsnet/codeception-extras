@@ -14,9 +14,11 @@
   },
   "require": {
     "php": ">=7.2",
+    "ext-json": "*",
     "codeception/codeception": "^4.1",
     "codeception/module-asserts": "^1.0",
-    "codeception/module-webdriver": "^1.0"
+    "codeception/module-webdriver": "^1.0",
+    "symfony/http-client": "^4.4 || ^5.0"
   },
   "require-dev": {
     "symplify/easy-coding-standard": "^8.1",

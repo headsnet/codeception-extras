@@ -1,11 +1,31 @@
 # Codeception Extras
 
-Various extensions for the Codeception test framework
+[![Build Status](https://travis-ci.com/headsnet/codeception-extras.svg?branch=master)](https://travis-ci.com/headsnet/codeception-extras)
+[![Latest Stable Version](https://poser.pugx.org/headsnet/codeception-extras/v)](//packagist.org/packages/headsnet/codeception-extras)
+[![Total Downloads](https://poser.pugx.org/headsnet/codeception-extras/downloads)](//packagist.org/packages/headsnet/codeception-extras)
+[![License](https://poser.pugx.org/headsnet/codeception-extras/license)](//packagist.org/packages/headsnet/codeception-extras)
 
-* JS Logger
-* Symfony Profiler URL extraction
-* Wait After Test
-* Screenshot Recorder
+This package provides extensions for the Codeception test framework.
+
+## Available Extensions
+
+__WebDriver extensions:__
+
+* [JS Logger](doc/js-console-logger.md) - log Javascript console messages
+* [Symfony Profiler URL](doc/symfony-profiler-url.md) - get Profile link for failed tests
+* [Wait After Test](doc/wait-after-test.md) - add a delay after each test
+* [W3C HTML Validation](doc/html-validator.md) - validate HTML source code
+
+## Requirements
+
+* PHP >=7.2
+* Codeception
+
+## Installation
+
+```shell script
+composer require --dev headsnet/codeception-extras
+```
 
 ### Contributing
 

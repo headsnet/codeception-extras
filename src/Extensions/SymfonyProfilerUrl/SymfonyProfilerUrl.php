@@ -10,14 +10,13 @@
 
 declare(strict_types=1);
 
-namespace Headsnet\CodeceptionExtras\Extensions;
+namespace Headsnet\CodeceptionExtras\Extensions\SymfonyProfilerUrl;
 
 use Codeception\Event\StepEvent;
 use Codeception\Event\SuiteEvent;
 use Codeception\Events;
-use Codeception\Extension;
-use Codeception\Module\WebDriver;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Headsnet\CodeceptionExtras\Extensions\AbstractWebDriverExtension;
 
 /**
  * Get the URL of the Symfony Profiler for any requests that error
@@ -28,53 +27,42 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
  *     profiler:
  *         collect: true
  */
-class SymfonyProfilerUrl extends Extension
+class SymfonyProfilerUrl extends AbstractWebDriverExtension
 {
-    /**
-     * @var string
-     */
-    private const PROFILER_LINK_STUB = 'https://app.3m.docker/_profiler/';
-
-    /**
-     * @var WebDriver
-     */
-    private $webDriverModule;
-
     /**
      * @var array
      */
     public static $events = [
-        Events::SUITE_BEFORE => 'beforeSuite',
+        Events::SUITE_BEFORE => [
+            ['loadWebDriver', 100],
+            ['beforeSuite', 0]
+        ],
         Events::STEP_AFTER => 'getDebugLink'
     ];
 
     public function beforeSuite(SuiteEvent $event)
     {
-        $this->webDriverModule = $this->getModule('WebDriver');
+        $this->validateParameter('profiler_link_base');
     }
 
     public function getDebugLink(StepEvent $event)
     {
-        $this->webDriverModule->executeInSelenium(function (RemoteWebDriver $webDriver): void
-        {
+        $this->webDriverModule->executeInSelenium(function (RemoteWebDriver $webDriver): void {
             $log = $webDriver->manage()->getLog('performance');
 
-            foreach ($log as $logEntry)
-            {
+            foreach ($log as $logEntry) {
                 $message = json_decode($logEntry['message']);
 
-                if ('Network.responseReceived' === $message->message->method)
-                {
+                if ('Network.responseReceived' === $message->message->method) {
                     $headers = $message->message->params->response->headers;
 
                     if (isset($headers->status) &&
                         in_array($headers->status, [400, 401, 403, 404, 500]) &&
-                        isset($headers->{'x-debug-token'}))
-                    {
+                        isset($headers->{'x-debug-token'})) {
                         $this->writeln(
                             sprintf(
                                 "\nProfiler URL for failed response: %s%s",
-                                self::PROFILER_LINK_STUB,
+                                $this->config['profiler_link_base'],
                                 $headers->{'x-debug-token'}
                             )
                         );

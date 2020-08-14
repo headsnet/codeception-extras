@@ -10,36 +10,40 @@
 
 declare(strict_types=1);
 
-namespace Headsnet\CodeceptionExtras\Extensions;
+namespace Headsnet\CodeceptionExtras\Extensions\WaitAfterTest;
 
+use Codeception\Event\SuiteEvent;
 use Codeception\Event\TestEvent;
 use Codeception\Events;
-use Codeception\Extension;
+use Headsnet\CodeceptionExtras\Extensions\AbstractCodeceptionExtension;
 
 /**
  * Apply a small delay after each test. This permits any late loading JS that
  * performs AJAX requests to the backend to still have a database file to access.
  * Otherwise the DB cleanup routine nukes the DB file and the HTTP request errors.
  */
-class WaitAfterTest extends Extension
+class WaitAfterTest extends AbstractCodeceptionExtension
 {
-    private const DELAY = 1;
-
     /**
      * @var array
      */
     public static $events = [
+        Events::SUITE_BEFORE => 'beforeSuite',
         Events::TEST_AFTER => 'afterTest',
     ];
 
+    public function beforeSuite(SuiteEvent $event)
+    {
+        $this->validateParameter('wait_time', 1);
+    }
+
     public function afterTest(TestEvent $event)
     {
-        sleep(self::DELAY);
+        sleep($this->config['wait_time']);
 
-        if ($this->options['verbosity'] >= 64)
-        {
+        if ($this->options['verbosity'] >= 64) {
             parent::writeln(
-                sprintf('Throttle applied for %s second after test complete', self::DELAY)
+                sprintf('Throttle applied for %s second after test complete', $this->config['wait_time'])
             );
         }
     }

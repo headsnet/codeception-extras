@@ -1,12 +1,17 @@
 
 # Wait After Test
 
-Apply a small delay after each test. This permits any late loading Javascript
-that performs AJAX requests to the backend to still have a database file to
-access.
+Automatically apply a delay after each test.
 
-Without this delay, the Codeception DB cleanup routine cleans up the database
-and the HTTP request errors due to a missing or reset database.
+#### Use Case
+
+You have a page which performs various AJAX requests on page load.
+
+When running an acceptance test on this page, Codeception removes/replaces the
+database before all the AJAX calls have completed. The test then fails.
+
+Introducing a delay after each test gives the AJAX calls time to complete
+before the database is replaced for the next test.
 
 ## Usage
 

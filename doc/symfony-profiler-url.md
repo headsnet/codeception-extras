@@ -4,10 +4,12 @@
 Get the URL of the Symfony Profiler for any requests that error.
 The URL is displayed in the test output.
 
+This extension requires the WebDriver module to be activated and configured as
+per the installation instructions.
+
 ## Requirements
 
-This extension requires the Symfony test environment to have the Profiler
-enabled:
+You must have the Symfony Profiler enabled in the test environment.
 
 ```yaml
 # config/packages/test/framework.yaml
@@ -33,7 +35,7 @@ framework:
 extensions:
   enabled:
     - Headsnet\CodeceptionExtras\Extensions\SymfonyProfilerUrl\SymfonyProfilerUrl:
-          profiler_link_base: 'https://my-app-domain.com/_profiler/'
+          profiler_link_base: 'http://my-app-domain.com/_profiler/'
 ```
 
 &laquo; [Back to package homepage](../../../)

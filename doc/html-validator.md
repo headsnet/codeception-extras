@@ -8,6 +8,9 @@ during each test, and pass it to a W3C validator instance
 Results can be shown in the test output, and also written to a log file for each
 test.
 
+This extension requires the WebDriver module to be activated and configured as
+per the installation instructions.
+
 ## Usage
 
 ```yaml

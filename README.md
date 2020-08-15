@@ -10,11 +10,12 @@ This package provides extensions for the Codeception test framework.
 ## Available Extensions
 
 __WebDriver extensions:__
-
 * [JS Logger](doc/js-console-logger.md) - log Javascript console messages
 * [Symfony Profiler URL](doc/symfony-profiler-url.md) - get Profile link for failed tests
-* [Wait After Test](doc/wait-after-test.md) - add a delay after each test
 * [W3C HTML Validation](doc/html-validator.md) - validate HTML source code
+
+__Other Extensions__
+* [Wait After Test](doc/wait-after-test.md) - add a delay after each test
 
 ## Requirements
 
@@ -23,8 +24,29 @@ __WebDriver extensions:__
 
 ## Installation
 
+Install the package via Composer
+
 ```shell script
 composer require --dev headsnet/codeception-extras
+```
+
+For extensions that require it, configure the WebDriver module.
+
+```yaml
+WebDriver:
+    url: 'http://myapp.com'
+    browser: chrome
+    host: chrome
+    port: 4444
+    window_size: false
+    capabilities:
+        webStorageEnabled: true
+        javascriptEnabled: true
+        'goog:loggingPrefs':
+            performance: 'ALL'
+        'goog:chromeOptions':
+            perfLoggingPrefs:
+                enableNetwork: true
 ```
 
 ### Contributing

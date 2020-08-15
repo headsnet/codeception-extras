@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 namespace Headsnet\CodeceptionExtras\Extensions\WaitAfterTest;
 
-use Codeception\Event\SuiteEvent;
-use Codeception\Event\TestEvent;
 use Codeception\Events;
 use Headsnet\CodeceptionExtras\Extensions\AbstractCodeceptionExtension;
 
@@ -25,19 +23,19 @@ use Headsnet\CodeceptionExtras\Extensions\AbstractCodeceptionExtension;
 class WaitAfterTest extends AbstractCodeceptionExtension
 {
     /**
-     * @var array
+     * @var array<string, string>
      */
     public static $events = [
         Events::SUITE_BEFORE => 'beforeSuite',
         Events::TEST_AFTER => 'afterTest',
     ];
 
-    public function beforeSuite(SuiteEvent $event)
+    public function beforeSuite(): void
     {
         $this->validateParameter('wait_time', 1);
     }
 
-    public function afterTest(TestEvent $event)
+    public function afterTest(): void
     {
         sleep($this->config['wait_time']);
 

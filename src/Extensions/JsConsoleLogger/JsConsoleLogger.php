@@ -13,52 +13,34 @@ declare(strict_types=1);
 namespace Headsnet\CodeceptionExtras\Extensions\JsConsoleLogger;
 
 use Codeception\Event\StepEvent;
-use Codeception\Event\SuiteEvent;
 use Codeception\Events;
 use Codeception\Module\Asserts;
 use Codeception\Test\Descriptor;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Headsnet\CodeceptionExtras\Extensions\AbstractWebDriverExtension;
+use PHPUnit\Framework\SelfDescribing;
 
 final class JsConsoleLogger extends AbstractWebDriverExtension
 {
     /**
-     * @var Asserts
-     */
-    private $assertsModule;
-
-    /**
-     * @var string
-     */
-    private $currentTestName;
-
-    /**
-     * @var array
+     * @var array<array|string>
      */
     public static $events = [
         Events::SUITE_BEFORE => [
             ['loadWebDriver', 100],
-            ['loadCurrentEnvironment', 100],
-            ['beforeSuite', 0]
+            ['loadCurrentEnvironment', 100]
         ],
         Events::STEP_AFTER => 'afterStep',
     ];
 
-    public function beforeSuite(SuiteEvent $event)
+    public function afterStep(StepEvent $event): void
     {
-        $this->assertsModule = $this->getModule('Asserts');
+        $this->checkJsErrors($event);
     }
 
-    public function afterStep(StepEvent $event)
+    private function checkJsErrors(StepEvent $event): void
     {
-        $this->currentTestName = Descriptor::getTestSignature($event->getTest());
-
-        $this->checkJsErrors();
-    }
-
-    private function checkJsErrors(): void
-    {
-        $this->webDriverModule->executeInSelenium(function (RemoteWebDriver $webDriver): void {
+        $this->webDriverModule->executeInSelenium(function (RemoteWebDriver $webDriver) use ($event): void {
             $log = $webDriver->manage()->getLog('browser');
 
             $errors = array_values(array_filter($log, function ($entry): bool {
@@ -70,10 +52,12 @@ final class JsConsoleLogger extends AbstractWebDriverExtension
             $errorMsg = count($errors) > 0 ? $errors[0]['message'] : '';
 
             if (count($errors) > 0) {
-                $this->writeLogFile($log);
+                $this->writeLogFile($event, $log);
             }
 
-            $this->assertsModule->assertCount(
+            /** @var Asserts $asserts */
+            $asserts = $this->getModule('Asserts');
+            $asserts->assertCount(
                 0,
                 $errors,
                 'Javascript warning: ' . $errorMsg
@@ -81,18 +65,29 @@ final class JsConsoleLogger extends AbstractWebDriverExtension
         });
     }
 
-    private function writeLogFile(array $log): void
+    /**
+     * @param array<string> $log
+     */
+    private function writeLogFile(StepEvent $event, array $log): void
     {
-        file_put_contents($this->getLogFileName(), print_r($log, true));
+        file_put_contents($this->getLogFileName($event), print_r($log, true));
     }
 
-    private function getLogFileName(): string
+    private function getLogFileName(StepEvent $event): string
     {
         return sprintf(
             '%s/_output/%s.%s.fail.js-errors.txt',
             dirname(__DIR__),
-            str_replace(['\\', ':'], '.', $this->currentTestName),
+            str_replace(['\\', ':'], '.', $this->getTestName($event)),
             $this->environment
         );
+    }
+
+    private function getTestName(StepEvent $event): string
+    {
+        /** @var SelfDescribing $test */
+        $test = $event->getTest();
+
+        return Descriptor::getTestSignature($test);
     }
 }

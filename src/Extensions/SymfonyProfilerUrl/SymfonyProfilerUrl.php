@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 namespace Headsnet\CodeceptionExtras\Extensions\SymfonyProfilerUrl;
 
-use Codeception\Event\StepEvent;
-use Codeception\Event\SuiteEvent;
 use Codeception\Events;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Headsnet\CodeceptionExtras\Extensions\AbstractWebDriverExtension;
@@ -30,7 +28,7 @@ use Headsnet\CodeceptionExtras\Extensions\AbstractWebDriverExtension;
 class SymfonyProfilerUrl extends AbstractWebDriverExtension
 {
     /**
-     * @var array
+     * @var array<array|string>
      */
     public static $events = [
         Events::SUITE_BEFORE => [
@@ -40,12 +38,12 @@ class SymfonyProfilerUrl extends AbstractWebDriverExtension
         Events::STEP_AFTER => 'getDebugLink'
     ];
 
-    public function beforeSuite(SuiteEvent $event)
+    public function beforeSuite(): void
     {
         $this->validateParameter('profiler_link_base');
     }
 
-    public function getDebugLink(StepEvent $event)
+    public function getDebugLink(): void
     {
         $this->webDriverModule->executeInSelenium(function (RemoteWebDriver $webDriver): void {
             $log = $webDriver->manage()->getLog('performance');

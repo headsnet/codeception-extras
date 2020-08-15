@@ -17,7 +17,10 @@ use Codeception\Extension;
 
 abstract class AbstractCodeceptionExtension extends Extension
 {
-    protected function validateParameter($paramName, $default = null): void
+    /**
+     * @param mixed $default
+     */
+    protected function validateParameter(string $paramName, $default = null): void
     {
         if (!array_key_exists($paramName, $this->config)) {
             if (!$default) {

@@ -12,12 +12,12 @@ declare(strict_types=1);
 
 namespace Headsnet\CodeceptionExtras\Extensions\HtmlValidator;
 
-use Codeception\Event\SuiteEvent;
 use Codeception\Event\TestEvent;
 use Codeception\Events;
 use Codeception\Exception\ExtensionException;
 use Codeception\Test\Descriptor;
 use Headsnet\CodeceptionExtras\Extensions\AbstractWebDriverExtension;
+use PHPUnit\Framework\SelfDescribing;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -27,11 +27,6 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
  */
 class HtmlValidator extends AbstractWebDriverExtension
 {
-    /**
-     * @var string
-     */
-    private $currentTestName;
-
     /**
      * @var int
      */
@@ -43,7 +38,7 @@ class HtmlValidator extends AbstractWebDriverExtension
     private $totalWarnings = 0;
 
     /**
-     * @var array
+     * @var array<array|string>
      */
     public static $events = [
         Events::SUITE_BEFORE => [
@@ -55,16 +50,14 @@ class HtmlValidator extends AbstractWebDriverExtension
         Events::TEST_AFTER => 'validateSourceCode'
     ];
 
-    public function beforeSuite(SuiteEvent $event)
+    public function beforeSuite(): void
     {
         $this->validateParameter('output_format', 'gnu');
         $this->validateParameter('validator_url');
     }
 
-    public function validateSourceCode(TestEvent $event)
+    public function validateSourceCode(TestEvent $event): void
     {
-        $this->currentTestName = Descriptor::getTestSignature($event->getTest());
-
         $htmlSource = $this->webDriverModule->grabPageSource();
 
         $client = HttpClient::create();
@@ -99,30 +92,33 @@ class HtmlValidator extends AbstractWebDriverExtension
             $this->displayGnuReport($reportData);
         }
 
-        $this->writeLogFile($reportData);
+        $this->writeLogFile($event, $reportData);
     }
 
-    public function afterSuite(SuiteEvent $event)
+    public function afterSuite(): void
     {
         $this->writeTotalSummaryLine();
     }
 
-    private function writeLogFile(string $results): void
+    private function writeLogFile(TestEvent $event, string $results): void
     {
-        file_put_contents($this->getLogFileName(), $results);
+        file_put_contents($this->getLogFileName($event), $results);
     }
 
-    private function getLogFileName(): string
+    private function getLogFileName(TestEvent $event): string
     {
         return sprintf(
             '%s/_output/%s.%s.fail.validation-errors.html',
             /*dirname(__DIR__)*/
             '/var/www/apps/app/tests',
-            str_replace(['\\', ':'], '.', $this->currentTestName),
+            str_replace(['\\', ':'], '.', $this->getTestName($event)),
             $this->environment
         );
     }
 
+    /**
+     * @return array<string, int>
+     */
     private function getErrorAndWarningTotals(string $reportData): array
     {
         return [
@@ -131,7 +127,10 @@ class HtmlValidator extends AbstractWebDriverExtension
         ];
     }
 
-    private function writeGnuSummaryLine(array $errorsAndWarnings)
+    /**
+     * @param array<string, int> $errorsAndWarnings
+     */
+    private function writeGnuSummaryLine(array $errorsAndWarnings): void
     {
         parent::writeln(
             sprintf(
@@ -142,7 +141,7 @@ class HtmlValidator extends AbstractWebDriverExtension
         );
     }
 
-    private function writeTotalSummaryLine()
+    private function writeTotalSummaryLine(): void
     {
         parent::writeln(
             sprintf(
@@ -174,5 +173,13 @@ class HtmlValidator extends AbstractWebDriverExtension
         $htmlReport = str_replace('script.js', 'https://validator.w3.org/nu/script.js', $htmlReport);
         $htmlReport = str_replace('icon.png', 'https://validator.w3.org/nu/icon.png', $htmlReport);
         return str_replace('<head>', '<head><meta charset="utf-8"/>', $htmlReport);
+    }
+
+    private function getTestName(TestEvent $event): string
+    {
+        /** @var SelfDescribing $test */
+        $test = $event->getTest();
+
+        return Descriptor::getTestSignature($test);
     }
 }

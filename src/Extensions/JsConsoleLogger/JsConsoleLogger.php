@@ -36,9 +36,6 @@ final class JsConsoleLogger extends AbstractWebDriverExtension
 
     /**
      * Handle event
-     *
-     * @param StepEvent $event
-     * @return void
      */
     public function afterStep(StepEvent $event): void
     {
@@ -48,8 +45,6 @@ final class JsConsoleLogger extends AbstractWebDriverExtension
     /**
      * Handle js errors if there are any
      *
-     * @param StepEvent $event
-     * @return void
      * @throws \Codeception\Exception\ModuleRequireException
      */
     private function checkJsErrors(StepEvent $event): void
@@ -121,10 +116,6 @@ final class JsConsoleLogger extends AbstractWebDriverExtension
         file_put_contents($this->getLogFileName($event), print_r($log, true), FILE_APPEND);
     }
 
-    /**
-     * @param StepEvent $event
-     * @return string
-     */
     private function getLogFileName(StepEvent $event): string
     {
         return sprintf(

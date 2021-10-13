@@ -17,22 +17,19 @@ use Codeception\Exception\ExtensionException;
 use Codeception\Exception\ModuleRequireException;
 use Codeception\Module\WebDriver;
 
+/**
+ * Base class for extensions
+ */
 abstract class AbstractWebDriverExtension extends AbstractCodeceptionExtension
 {
-    /**
-     * @var WebDriver
-     */
-    protected $webDriverModule;
+    protected \Codeception\Module\WebDriver $webDriverModule;
 
-    /**
-     * @var string
-     */
-    protected $environment;
+    protected string $environment = 'testing';
 
     public function loadWebDriver(SuiteEvent $event): void
     {
         try {
-            $this->webDriverModule = $this->webDriverModule = $this->getModule('WebDriver');
+            $this->webDriverModule = $this->getModule('WebDriver');
         } catch (ModuleRequireException $moduleRequireException) {
             throw new ExtensionException($this, 'This extension requires the WebDriver module!');
         }
@@ -40,10 +37,8 @@ abstract class AbstractWebDriverExtension extends AbstractCodeceptionExtension
 
     public function loadCurrentEnvironment(SuiteEvent $event): void
     {
-        if (!array_key_exists('current_environment', $event->getSettings())) {
-            throw new ExtensionException($this, 'No test environment specified!');
+        if (array_key_exists('current_environment', $event->getSettings())) {
+            $this->environment = str_replace(',', '.', $event->getSettings()['current_environment']);
         }
-
-        $this->environment = str_replace(',', '.', $event->getSettings()['current_environment']);
     }
 }

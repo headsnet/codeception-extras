@@ -108,9 +108,8 @@ class HtmlValidator extends AbstractWebDriverExtension
     private function getLogFileName(TestEvent $event): string
     {
         return sprintf(
-            '%s/_output/%s.%s.fail.validation-errors.html',
-            /*dirname(__DIR__)*/
-            '/var/www/apps/app/tests',
+            '%s/%s.%s.fail.validation-errors.html',
+            $this->getLogDir(),
             str_replace(['\\', ':'], '.', $this->getTestName($event)),
             $this->environment
         );

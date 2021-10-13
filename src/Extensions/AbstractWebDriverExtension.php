@@ -22,20 +22,10 @@ use Codeception\Module\WebDriver;
  */
 abstract class AbstractWebDriverExtension extends AbstractCodeceptionExtension
 {
-    /**
-     * @var WebDriver
-     */
     protected \Codeception\Module\WebDriver $webDriverModule;
 
-    /**
-     * @var string
-     */
     protected string $environment = 'testing';
 
-    /**
-     * @param SuiteEvent $event
-     * @return void
-     */
     public function loadWebDriver(SuiteEvent $event): void
     {
         try {
@@ -45,10 +35,6 @@ abstract class AbstractWebDriverExtension extends AbstractCodeceptionExtension
         }
     }
 
-    /**
-     * @param SuiteEvent $event
-     * @return void
-     */
     public function loadCurrentEnvironment(SuiteEvent $event): void
     {
         if (array_key_exists('current_environment', $event->getSettings())) {
